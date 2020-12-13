@@ -62,6 +62,10 @@ Adzuna_us <- Adzuna_us[, -c(2, 8, 14, 16)]
 ```
 
 ```{r}
+Adzuna_us <- Adzuna_us[, -13]
+```
+
+```{r}
 # Remove unnecessary characters 
 Adzuna_us$title <- gsub("</strong>","",Adzuna_us$title)
 Adzuna_us$title <- gsub("<strong>","",Adzuna_us$title)
@@ -122,6 +126,7 @@ muse_data$level <- level
 muse_data <- muse_data[, -c(9, 10, 11)]
 ```
 
+
 ```{r}
 # Remove unnecessary characters 
 muse_data$contents <- gsub("</strong>","",muse_data$contents)
@@ -135,5 +140,6 @@ muse_data$contents <- gsub("</em>","",muse_data$contents)
 # Save the csv
 write.csv(muse_data, "muse_data.csv")
 write.csv(Adzuna_data, "Adzuna_data.csv")
+write.csv(Adzuna_us, "Adzuna_us.csv")
 ```
 
