@@ -1,0 +1,139 @@
+---
+title: "Data Processing"
+author: "Ruxin Liu"
+date: "12/13/2020"
+output: pdf_document
+---
+
+# Adzuna Data -- UK
+
+```{r, echo = FALSE, eval = FALSE}
+library(jsonlite)
+Adzuna_file <- jsonlite::fromJSON("https://api.adzuna.com/v1/api/jobs/gb/search/1?app_id=953c7802&app_key=7c8ece93f1f774f74085f3a09c61a3ae&results_per_page=50&what_or=data%20statisticians%20statistician%20analyst%20analysts", flatten = TRUE)
+Adzuna_data <- Adzuna_file$results
+```
+
+```{r, echo = FALSE, eval = FALSE}
+# The 1st part of the url
+url_1 <- "https://api.adzuna.com/v1/api/jobs/gb/search/"
+# The 2nd part of the url, set per_page = 50 to read the maximum results per time
+url_2 <- "?app_id=953c7802&app_key=7c8ece93f1f774f74085f3a09c61a3ae&results_per_page=50&what_or=data%20statisticians%20statistician%20analyst%20analysts"
+library(stringr)
+for(i in 2 : 50) {
+  url_Adzuna <- str_c(url_1, i, url_2, sep = "")
+  Adzuna_file <- jsonlite::fromJSON(url_Adzuna, flatten=TRUE)
+  Adzuna <- Adzuna_file$results
+  Adzuna_data <- bind_rows(Adzuna_data, Adzuna)
+}
+```
+
+```{r}
+# Remove unnecessary characters 
+Adzuna_data$title <- gsub("</strong>","",Adzuna_data$title)
+Adzuna_data$title <- gsub("<strong>","",Adzuna_data$title)
+Adzuna_data$description <- gsub("</strong>","",Adzuna_data$description)
+Adzuna_data$description <- gsub("<strong>","",Adzuna_data$description)
+```
+
+# Adzuna Data -- US
+
+```{r, echo = FALSE, eval = FALSE}
+library(jsonlite)
+Adzuna_file_us <- jsonlite::fromJSON("https://api.adzuna.com/v1/api/jobs/us/search/1?app_id=953c7802&app_key=7c8ece93f1f774f74085f3a09c61a3ae&results_per_page=50&what_or=data%20statisticians%20statistician%20analyst%20analysts", flatten = TRUE)
+Adzuna_us <- Adzuna_file_us$results
+```
+
+```{r, echo = FALSE, eval = FALSE}
+# The 1st part of the url
+url_1_us <- "https://api.adzuna.com/v1/api/jobs/us/search/"
+# The 2nd part of the url, set per_page = 50 to read the maximum results per time
+url_2_us <- "?app_id=953c7802&app_key=7c8ece93f1f774f74085f3a09c61a3ae&results_per_page=50&what_or=data%20statisticians%20statistician%20analyst%20analysts"
+for(i in 28 : 50) {
+  url_Adzuna_us <- str_c(url_1_us, i, url_2_us, sep = "")
+  Adzuna_file_us <- jsonlite::fromJSON(url_Adzuna_us, flatten=TRUE)
+  Adzuna <- Adzuna_file_us$results
+  Adzuna_us <- bind_rows(Adzuna_us, Adzuna)
+}
+```
+
+```{r}
+# Remove unnecessary columns 
+Adzuna_us <- Adzuna_us[, -c(2, 8, 14, 16)]
+```
+
+```{r}
+# Remove unnecessary characters 
+Adzuna_us$title <- gsub("</strong>","",Adzuna_us$title)
+Adzuna_us$title <- gsub("<strong>","",Adzuna_us$title)
+Adzuna_us$description <- gsub("</strong>","",Adzuna_us$description)
+Adzuna_us$description <- gsub("<strong>","",Adzuna_us$description)
+```
+
+# The Muse Data
+
+```{r, echo = FALSE, eval = FALSE}
+themuse_file <- jsonlite::fromJSON("https://www.themuse.com/api/public/jobs?company=Amazon&company=Facebook&company=TripAdvisor&category=Data%20Science&api_key=05db5552751b2cbc084c19c517084ae6b3c7a69b2af3e7d07968fdc02f53ff39&page=3", flatten=TRUE)
+View(themuse_file$results)
+```
+
+
+```{r, echo = FALSE, eval = FALSE}
+muse_file <- jsonlite::fromJSON("https://www.themuse.com/api/public/jobs?company=Amazon&company=Facebook&category=Data%20Science&api_key=05db5552751b2cbc084c19c517084ae6b3c7a69b2af3e7d07968fdc02f53ff39&page=1", flatten=TRUE)
+muse_data <- muse_file$results
+```
+
+
+
+```{r, echo = FALSE, eval = FALSE}
+# The 1st part of the url
+url_1 <- "https://www.themuse.com/api/public/jobs?company=Amazon&company=Facebook&category=Data%20Science&api_key=05db5552751b2cbc084c19c517084ae6b3c7a69b2af3e7d07968fdc02f53ff39&page="
+library(stringr)
+library(dplyr)
+for(i in 2 : 500) {
+  url <- str_c(url_1, i, sep = "")
+  themuse_file <- jsonlite::fromJSON(url, flatten=TRUE)
+  themuse <- themuse_file$results
+  muse_data <- bind_rows(muse_data, themuse)
+}
+```
+
+```{r, echo = FALSE, eval = FALSE}
+for(i in 64 : 500) {
+  url <- str_c(url_1, i, sep = "")
+  themuse_file <- jsonlite::fromJSON(url, flatten=TRUE)
+  themuse <- themuse_file$results
+  muse_data <- bind_rows(muse_data, themuse)
+}
+```
+
+```{r, echo = FALSE, eval = FALSE}
+muse_data$locations <- unlist(unname(muse_data[[8]]))
+```
+
+```{r, echo = FALSE, eval = FALSE}
+level <- numeric(0)
+for(i in 1 : 1239) {
+  level <- c(level, unlist(muse_data[[10]][[i]]$short_name))
+}
+```
+
+```{r, echo = FALSE, eval = FALSE}
+muse_data$level <- level
+muse_data <- muse_data[, -c(9, 10, 11)]
+```
+
+```{r}
+# Remove unnecessary characters 
+muse_data$contents <- gsub("</strong>","",muse_data$contents)
+muse_data$contents <- gsub("<strong>","",muse_data$contents)
+muse_data$contents <- gsub("<br>","",muse_data$contents)
+muse_data$contents <- gsub("<p>","",muse_data$contents)
+muse_data$contents <- gsub("</em>","",muse_data$contents)
+```
+
+```{r}
+# Save the csv
+write.csv(muse_data, "muse_data.csv")
+write.csv(Adzuna_data, "Adzuna_data.csv")
+```
+
