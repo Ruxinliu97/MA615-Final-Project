@@ -77,6 +77,21 @@ set.seed(1997)
 wordcloud(words = df_uk$word, freq = df_uk$freq, min.freq = 1, max.words=200, random.order=FALSE, rot.per=0.35,            colors=brewer.pal(8, "Dark2"))
 ```
 
+```{r,echo = FALSE, message=FALSE, warning=FALSE}
+# Add the indicator to determine whether the title contains "Statistician"
+Adzuna_data$Statistician <- ifelse(grepl("Statistician",Adzuna_data$title) == "TRUE", 1, 0)
+```
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+ggplot(Adzuna_data) +
+  geom_boxplot(aes(x = factor(Statistician), y = salary_max, fill=factor(Statistician))) +
+  ylab("Maximum Salary") +
+  xlab("Statistician Indicator") +
+  ggtitle("Fig. : Maximum Salary Distributions for Statistician and Non-statistician") +
+  scale_fill_discrete(name = "Statistician Indicator", labels = c("Job Title Not Containing Statistician", "Job Title Containing Statistician"))
+```
+
+
 ### Adzuna Data -- US
 
 ```{r, echo = FALSE, message=FALSE, warning=FALSE}
@@ -99,11 +114,6 @@ set.seed(1997)
 wordcloud(words = df_us$word, freq = df_us$freq, min.freq = 1, max.words=200, random.order=FALSE, rot.per=0.35,            colors=brewer.pal(8, "Dark2"))
 ```
 
-```{r}
-category <- Adzuna_us %>% 
-  group_by(category.label) %>% 
-  summarize(number = length(category.label))
-```
 
 
 
@@ -163,7 +173,7 @@ set.seed(1997)
 wordcloud(words = df$word, freq = df$freq, min.freq = 1, max.words=200, random.order=FALSE, rot.per=0.35,            colors=brewer.pal(8, "Dark2"))
 ```
 
-
+# Discussion 
 
 # Limitations & Future Direction 
 
