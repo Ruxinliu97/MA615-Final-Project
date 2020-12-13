@@ -9,6 +9,7 @@ library(wordcloud)
 library(RColorBrewer)
 library(wordcloud2)
 library(tm)
+library(shinythemes)
 
 # Load in the data sets
 muse_data <- read.csv("muse_data.csv")
@@ -21,6 +22,7 @@ website <- c("Adzuna_uk", "Adzuna_us", "The Muse")
 # Define UI for application that draws a histogram
 
 ui <- fluidPage(
+    theme = shinytheme('lumen'),
     # Add web page title
     titlePanel(h1("Job Descriptions ", align = "center",
                   style = {'background-color:hsl(90, 85%,90%);color:green; 
