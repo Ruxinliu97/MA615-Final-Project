@@ -23,20 +23,94 @@ output: pdf_document
   cleaning and processing are in the file Data Processing.Rmd. 
   
   Adzuna is an employment website where its headquarters located in the United 
-  Kingdom (Wikipedia 2020). From this site, we obtain some job information in Britain
-  that has keywords of data, statisticians, statistician, analyst or analysts. 
+  Kingdom (Wikipedia 2020). From this site, we obtain 50-page of job information
+  in Britain that has keywords of data, statisticians, statistician, analyst or 
+  analysts. Also, we obtain 50-page of job information in America with the same
+  list of key words. 
 
 ```{r, echo = FALSE}
 # Read in the pre-processed data
 muse_data <- read.csv("muse_data.csv")
 Adzuna_data <- read.csv("Adzuna_data.csv")
+Adzuna_us <- read.csv("Adzuna_us.csv")
+```
+
+
+
+# EDA (Exploratory Data Analysis)
+### Adzuna Data -- UK
+
+
+```{r, echo = FALSE, message=FALSE}
+# Word Clouds
+library(wordcloud)
+library(RColorBrewer)
+library(wordcloud2)
+library(tm)
+# Create a vector containing only the text
+text_uk <- Adzuna_data$description
+# Create a corpus  
+docs_uk <- Corpus(VectorSource(text_uk))
+```
+
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
+# Clean the data -- remove some words, symbols & spaces
+docs_uk <- docs_uk %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(stripWhitespace)
+docs_uk <- tm_map(docs_uk, content_transformer(tolower))
+docs_uk <- tm_map(docs_uk, removeWords, stopwords("english"))
+```
+
+```{r, echo = FALSE}
+# Create a document-term-matrix
+dtm_uk <- TermDocumentMatrix(docs_uk) 
+matrix_uk <- as.matrix(dtm_uk) 
+words_uk <- sort(rowSums(matrix_uk),decreasing=TRUE) 
+df_uk <- data.frame(word = names(words_uk),freq=words_uk)
+```
+
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
+# For reproducibility 
+set.seed(1997) 
+wordcloud(words = df_uk$word, freq = df_uk$freq, min.freq = 1, max.words=200, random.order=FALSE, rot.per=0.35,            colors=brewer.pal(8, "Dark2"))
+```
+
+### Adzuna Data -- US
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+text_us <- Adzuna_us$description
+docs_us <- Corpus(VectorSource(text_us))
+
+docs_us <- docs_us %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(stripWhitespace)
+docs_us <- tm_map(docs_us, content_transformer(tolower))
+docs_us <- tm_map(docs_us, removeWords, stopwords("english"))
+
+dtm_us <- TermDocumentMatrix(docs_us) 
+matrix_us <- as.matrix(dtm_us) 
+words_us <- sort(rowSums(matrix_us),decreasing=TRUE) 
+df_us <- data.frame(word = names(words_us),freq=words_us)
+
+set.seed(1997) 
+wordcloud(words = df_us$word, freq = df_us$freq, min.freq = 1, max.words=200, random.order=FALSE, rot.per=0.35,            colors=brewer.pal(8, "Dark2"))
+```
+
+```{r}
+category <- Adzuna_us %>% 
+  group_by(category.label) %>% 
+  summarize(number = length(category.label))
 ```
 
 
 
 
-# EDA (Exploratory Data Analysis)
 
+
+### The Muse
 ```{r, echo = FALSE, message = FALSE}
 library(dplyr)
 # Whether SQL is mentioned in the job description
@@ -70,37 +144,21 @@ ggplot(muse_data, aes(level, fill = analysis)) +
 ```
 
 ```{r, echo = FALSE, message=FALSE}
-# Word Clouds
-library(wordcloud)
-library(RColorBrewer)
-library(wordcloud2)
-library(tm)
-# Create a vector containing only the text
 text <- muse_data$contents
-# Create a corpus  
 docs <- Corpus(VectorSource(text))
-```
 
-```{r, warning=FALSE, message=FALSE, echo = FALSE}
-# Clean the data -- remove some words or symbols 
 docs <- docs %>%
   tm_map(removeNumbers) %>%
   tm_map(removePunctuation) %>%
   tm_map(stripWhitespace)
 docs <- tm_map(docs, content_transformer(tolower))
 docs <- tm_map(docs, removeWords, stopwords("english"))
-```
 
-```{r, echo = FALSE}
-# Create a document-term-matrix
 dtm <- TermDocumentMatrix(docs) 
 matrix <- as.matrix(dtm) 
 words <- sort(rowSums(matrix),decreasing=TRUE) 
 df <- data.frame(word = names(words),freq=words)
-```
 
-```{r, warning=FALSE, message=FALSE, echo = FALSE}
-# For reproducibility 
 set.seed(1997) 
 wordcloud(words = df$word, freq = df$freq, min.freq = 1, max.words=200, random.order=FALSE, rot.per=0.35,            colors=brewer.pal(8, "Dark2"))
 ```
