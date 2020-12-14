@@ -30,6 +30,22 @@ ui <- fluidPage(
     h4(tags$a(href="https://github.com/Ruxinliu97/MA615-Final-Project", "Ruxin Liu")),
     mainPanel(
         tabsetPanel(
+            
+            tabPanel("Word Cloud",
+                     sidebarLayout(
+                         sidebarPanel(
+                             radioButtons("source",
+                                          "Word Source", 
+                                          c("Adzuna_uk" = "uk", "Adzuna_us" ="us", "The Muse"="muse")),
+                             numericInput("num", "Maximum Number Of Words", value = 180, min = 10)
+                         ),
+                      
+                         
+                         mainPanel(
+                             wordcloud2Output('cloud') 
+                         )
+                     )
+            ) ,
             tabPanel("Job Board Websites", 
                      # Generate a row with a sidebar
                      sidebarLayout(      
@@ -42,22 +58,8 @@ ui <- fluidPage(
                          ),
                          mainPanel(
                              tableOutput("view") 
-                         ))) ,
+                         ))) 
             
-            tabPanel("Word Cloud",
-                     sidebarLayout(
-                         sidebarPanel(
-                             radioButtons("source",
-                                          "Word Source", 
-                                          c("Adzuna_uk" = "uk", "Adzuna_us" ="us", "The Muse"="muse"))
-                         ),
-                      
-                         
-                         mainPanel(
-                             wordcloud2Output('cloud') 
-                         )
-                     )
-            ) 
             
         )
     )
@@ -97,11 +99,12 @@ server <- function(input, output) {
         docs <- tm_map(docs, removePunctuation)
         docs <- tm_map(docs, stripWhitespace)
         docs <- tm_map(docs, removeWords, stopwords(tolower("english")))
-        
+        docs <- tm_map(docs, removeWords, c("the", "will", "are", "you", "this"))
         dtm <- TermDocumentMatrix(docs) 
         matrix <- as.matrix(dtm) 
         words <- sort(rowSums(matrix),decreasing=TRUE) 
         df <- data.frame(word = names(words),freq=words)
+        df <- head(df, n = num_words)
         wordcloud2(df)
 
     }
@@ -109,7 +112,7 @@ server <- function(input, output) {
     
     output$cloud <-renderWordcloud2({
         create_wordcloud(data_source(),
-                         num_words = 200)
+                         num_words = input$num)
     })
 }
 
