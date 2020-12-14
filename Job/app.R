@@ -17,6 +17,10 @@ Adzuna_data <- read.csv("Adzuna_data.csv")
 Adzuna_us <- read.csv("Adzuna_us.csv")
 cite <- read.csv("jobsite.csv")
 
+muse_data$sql <- grepl("SQL",muse_data$contents)
+muse_data$Python <- grepl("Python",muse_data$contents)
+muse_data$SAS <- grepl("SAS",muse_data$contents)
+muse_data$R <- grepl("\\bR\\b",muse_data$contents)
 
 
 # Define UI for application that draws a histogram
@@ -46,6 +50,19 @@ ui <- fluidPage(
                          )
                      )
             ) ,
+            tabPanel("Programing Skills In Job Descriptions", 
+                     # Generate a row with a sidebar
+                     sidebarLayout(      
+                         
+                         # Define the sidebar with one input
+                         sidebarPanel(
+                             selectInput("skill", "Skill:", 
+                                         choices = c("R", "SAS", "SQL","Python"))
+                             
+                         ),
+                         mainPanel(
+                             plotOutput("plot")
+                         ))) ,
             tabPanel("Job Board Websites", 
                      # Generate a row with a sidebar
                      sidebarLayout(      
@@ -88,8 +105,42 @@ server <- function(input, output) {
             data <- read.csv("muse_data.csv")
             text <- data$contents
         }
-        return(text)
+        print(text)
     })
+    
+
+    
+    output$plot <- reactivePlot(function(){
+        if(input$skill == "R"){
+            p <- ggplot(muse_data, aes(level, fill = R)) +
+                geom_bar() +
+                scale_fill_discrete(labels = c("Not Containing R", "JContaining R"))
+        }
+        if(input$skill == "SAS"){
+            p <- ggplot(muse_data, aes(level, fill = SAS)) +
+                geom_bar() +
+                scale_fill_discrete(labels = c("Not Containing SAS", "Containing SAS"))
+        }
+        if(input$skill == "Python"){
+            p <- ggplot(muse_data, aes(level, fill = Python)) +
+                geom_bar() +
+                scale_fill_discrete(labels = c("Not Containing Python", "Containing Python"))
+        }
+        if(input$skill == "SQL"){
+            p <- ggplot(muse_data, aes(level, fill = sql)) +
+                geom_bar() +
+                ggtitle("Occurrence Frequency of SQL in Job Description") +
+                scale_fill_discrete(labels = c("Not Containing SQL", "Containing SQL"))
+        }
+        print(p)
+        
+    })
+    plotOutput(
+        plot,
+        width = "100%",
+        height = "400px"
+    )
+    
     
     create_wordcloud <- function(text, num_words = 100){
         
@@ -114,6 +165,8 @@ server <- function(input, output) {
         create_wordcloud(data_source(),
                          num_words = input$num)
     })
+    
+    
 }
 
 # Run the application 
