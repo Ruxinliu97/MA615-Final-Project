@@ -4,6 +4,9 @@ author: "Ruxin Liu"
 date: "12/13/2020"
 output: pdf_document
 ---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.pos = 'H')
+```
 
 # Introduction
 
@@ -249,9 +252,27 @@ set.seed(1997)
 wordcloud(words = df$word, freq = df$freq, min.freq = 1, max.words=180, random.order=FALSE, rot.per=0.35,            colors=brewer.pal(8, "Dark2"))
 ```
 
-data experience analyst team business
-data analyst business support 
-data experience team learning research 
+
+  There is no surprise to see that word "data" is always the one with the highest
+  word frequency since we are focusing on data-related jobs. Except for this, the
+  3 different word clouds also show very interesting patterns. Some of the most 
+  commonly used descriptors from Adzuna UK are: "experience", "analyst",
+  "team" and "business". And some of the most commonly used descriptors from 
+  Adzuna US are: "analyst", "business" and "support". Although these are 
+  job information for different countries, it seems that the words used in 
+  descriptions are relatively consistent. 
+  
+  For The Muse, some of the most commonly used descriptors are: "experience",
+  "team", "learning", "research", "computer", "models", "quantitative", "science"
+  and "statistics". The words "experience" and "team" have very high frequency 
+  for both job websites, which suggests that practical working experience in the
+  fields and teamwork skills are always crucial things to have. Except for this, 
+  there are more academic/statistics related descriptors appears on The Muse, 
+  which suggests that different employment websites may have a slightly different
+  focus when describing the position. 
+  
+
+
 
 # Discussion 
 
@@ -266,7 +287,10 @@ for about half of the time. And Python is now shown to be the most required skil
 for data-related jobs. This could be very helpful when we are applying for jobs
 in the future. 
 
-* 
+* The job information for different countries from the same job board is more 
+likely to have similar descriptions, while similar job information from different 
+job boards may have a different focus when describing the position. 
+
 
 # Limitations & Future Direction 
 
