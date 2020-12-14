@@ -1,5 +1,5 @@
 ---
-title: "Final Project"
+title: "Final Project report -- Job Descriptions"
 author: "Ruxin Liu"
 date: "12/13/2020"
 output: pdf_document
@@ -26,7 +26,23 @@ output: pdf_document
   Kingdom (Wikipedia 2020). From this site, we obtain 50-page of job information
   in Britain that has keywords of data, statisticians, statistician, analyst or 
   analysts. Also, we obtain 50-page of job information in America with the same
-  list of key words. 
+  list of key words. Only the job information from Britain has salary listed, which
+  is reasonable, since the majority of the job boards do not show the salary on 
+  their pages.
+  
+  The Muse is another employment website founded in 2011, where its headquarters
+  located in the United States (Wikipedia 2020). From this site, we obtain 60-page
+  of job information from the data science category, which is very close to the 
+  keywords being searched from Adzuna. 
+  
+```{r, echo = FALSE, message=FALSE}
+library(wordcloud)
+library(RColorBrewer)
+library(wordcloud2)
+library(tm)
+library(tidyverse)
+library(dplyr)
+```
 
 ```{r, echo = FALSE}
 # Read in the pre-processed data
@@ -38,27 +54,119 @@ Adzuna_us <- read.csv("Adzuna_us.csv")
 
 
 # EDA (Exploratory Data Analysis)
-### Adzuna Data -- UK
+
+### Salary Level & Job Title
 
 
-```{r, echo = FALSE, message=FALSE}
-# Word Clouds
-library(wordcloud)
-library(RColorBrewer)
-library(wordcloud2)
-library(tm)
+  Since the UK job information on Adzuna website has predicted maximum salary in
+  pounds, we could explore whether the salary level has any relationship with the
+  job title. In order to do this, an indicator variable is created to determine 
+  whether or not the position name includes "Statistician". From Fig.1 below, we 
+  can see that overall companies predict a relatively higher salary for job titles 
+  containing "Statistician" (indicator = 1). However, it is also very interesting
+  to see that there are much more outliers with very large values for the job titles 
+  not containing "Statistician" (indicator = 0). This suggests that on average the
+  jobs that does not contain "Statistician" in the title may have a lower
+  salary, but at the same time, there are large opportunities to reach a very high
+  and less limited salary level. 
+  
+
+```{r,echo = FALSE, message=FALSE, warning=FALSE}
+# Add the indicator to determine whether the title contains "Statistician"
+Adzuna_data$Statistician <- ifelse(grepl("Statistician",Adzuna_data$title) == "TRUE", 1, 0)
+
+ggplot(Adzuna_data) +
+  geom_boxplot(aes(x = factor(Statistician), y = salary_max, fill=factor(Statistician))) +
+  ylab("Maximum Salary") +
+  xlab("Statistician Indicator") +
+  ggtitle("Fig. 1: Maximum Salary Distributions for Statistician and Non-statistician") +
+  scale_fill_discrete(name = "Statistician Indicator", labels = c("Job Title Not Containing Statistician", "Job Title Containing Statistician"))
+```
+
+### Required Skills & Level 
+
+
+  On The Muse website, we could obtain the level of the positions for each job 
+  posting, which includes internship, entry, mid, senior, management. From Table 1
+  below, we can see the number of job posting in each level among the sampled pages,
+  and it seems that under the data science category there are very few positions
+  available for the entry level.
+  
+
+  
+  
+```{r, echo = FALSE}
+level_num <- muse_data %>% 
+  group_by(level) %>% 
+  tally()
+kableExtra::kable(level_num, caption = "Number of job posting in each level")
+```
+  
+  Since programming skills are very crucial in data related positions, we could
+  explore the occurrence frequency of specific skills in the job description among
+  different position levels. More specifically, 4 commonly-used programing languages
+  are tested, which are SQL, Python, SAS and R.
+  
+  
+```{r, echo = FALSE, message = FALSE}
+# Whether SQL is mentioned in the job description
+muse_data$sql <- grepl("SQL",muse_data$contents)
+# Whether Python is mentioned in the job description
+muse_data$Python <- grepl("Python",muse_data$contents)
+muse_data$SAS <- grepl("SAS",muse_data$contents)
+muse_data$R <- grepl("\\bR\\b",muse_data$contents)
+```
+
+
+
+```{r, message=FALSE, echo = FALSE}
+ggplot(muse_data, aes(level, fill = sql)) +
+  geom_bar()
+```
+
+```{r, message=FALSE, echo = FALSE}
+ggplot(muse_data, aes(level, fill = Python)) +
+  geom_bar()
+```
+
+```{r, message=FALSE, echo = FALSE}
+ggplot(muse_data, aes(level, fill = analysis)) +
+  geom_bar()
+```
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+text <- muse_data$contents
+docs <- Corpus(VectorSource(text))
+
+docs <- docs %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(stripWhitespace)
+docs <- tm_map(docs, content_transformer(tolower))
+docs <- tm_map(docs, removeWords, stopwords("english"))
+docs <- tm_map(docs, removeWords, c("the", "will", "are", "you", "this"))
+
+dtm <- TermDocumentMatrix(docs) 
+matrix <- as.matrix(dtm) 
+words <- sort(rowSums(matrix),decreasing=TRUE) 
+df <- data.frame(word = names(words),freq=words)
+
+set.seed(1997) 
+wordcloud(words = df$word, freq = df$freq, min.freq = 1, max.words=180, random.order=FALSE, rot.per=0.35,            colors=brewer.pal(8, "Dark2"))
+```
+
+# Word Cloud
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
 # Create a vector containing only the text
 text_uk <- Adzuna_data$description
 # Create a corpus  
 docs_uk <- Corpus(VectorSource(text_uk))
-```
-
-```{r, warning=FALSE, message=FALSE, echo = FALSE}
 # Clean the data -- remove some words, symbols & spaces
 docs_uk <- docs_uk %>%
   tm_map(removeNumbers) %>%
   tm_map(removePunctuation) %>%
   tm_map(stripWhitespace)
+docs_uk <- tm_map(docs_uk, removeWords, c("the", "will", "are", "you", "this"))
 docs_uk <- tm_map(docs_uk, content_transformer(tolower))
 docs_uk <- tm_map(docs_uk, removeWords, stopwords("english"))
 ```
@@ -77,21 +185,6 @@ set.seed(1997)
 wordcloud(words = df_uk$word, freq = df_uk$freq, min.freq = 1, max.words=200, random.order=FALSE, rot.per=0.35,            colors=brewer.pal(8, "Dark2"))
 ```
 
-```{r,echo = FALSE, message=FALSE, warning=FALSE}
-# Add the indicator to determine whether the title contains "Statistician"
-Adzuna_data$Statistician <- ifelse(grepl("Statistician",Adzuna_data$title) == "TRUE", 1, 0)
-```
-
-```{r, echo = FALSE, message=FALSE, warning=FALSE}
-ggplot(Adzuna_data) +
-  geom_boxplot(aes(x = factor(Statistician), y = salary_max, fill=factor(Statistician))) +
-  ylab("Maximum Salary") +
-  xlab("Statistician Indicator") +
-  ggtitle("Fig. : Maximum Salary Distributions for Statistician and Non-statistician") +
-  scale_fill_discrete(name = "Statistician Indicator", labels = c("Job Title Not Containing Statistician", "Job Title Containing Statistician"))
-```
-
-
 ### Adzuna Data -- US
 
 ```{r, echo = FALSE, message=FALSE, warning=FALSE}
@@ -102,6 +195,8 @@ docs_us <- docs_us %>%
   tm_map(removeNumbers) %>%
   tm_map(removePunctuation) %>%
   tm_map(stripWhitespace)
+docs_us <- tm_map(docs_us, removeWords, c("the", "will", "are", "you", "this"))
+
 docs_us <- tm_map(docs_us, content_transformer(tolower))
 docs_us <- tm_map(docs_us, removeWords, stopwords("english"))
 
@@ -112,65 +207,6 @@ df_us <- data.frame(word = names(words_us),freq=words_us)
 
 set.seed(1997) 
 wordcloud(words = df_us$word, freq = df_us$freq, min.freq = 1, max.words=200, random.order=FALSE, rot.per=0.35,            colors=brewer.pal(8, "Dark2"))
-```
-
-
-
-
-
-
-
-### The Muse
-```{r, echo = FALSE, message = FALSE}
-library(dplyr)
-# Whether SQL is mentioned in the job description
-muse_data$sql <- grepl("SQL",muse_data$contents)
-# Whether Python is mentioned in the job description
-muse_data$Python <- grepl("Python",muse_data$contents)
-muse_data$analysis <- grepl("analysis",muse_data$contents)
-```
-
-```{r, echo = FALSE}
-level_num <- muse_data %>% 
-  group_by(level) %>% 
-  tally()
-kableExtra::kable(level_num)
-```
-
-```{r, message=FALSE, echo = FALSE}
-library(tidyverse)
-ggplot(muse_data, aes(level, fill = sql)) +
-  geom_bar()
-```
-
-```{r, message=FALSE, echo = FALSE}
-ggplot(muse_data, aes(level, fill = Python)) +
-  geom_bar()
-```
-
-```{r, message=FALSE, echo = FALSE}
-ggplot(muse_data, aes(level, fill = analysis)) +
-  geom_bar()
-```
-
-```{r, echo = FALSE, message=FALSE}
-text <- muse_data$contents
-docs <- Corpus(VectorSource(text))
-
-docs <- docs %>%
-  tm_map(removeNumbers) %>%
-  tm_map(removePunctuation) %>%
-  tm_map(stripWhitespace)
-docs <- tm_map(docs, content_transformer(tolower))
-docs <- tm_map(docs, removeWords, stopwords("english"))
-
-dtm <- TermDocumentMatrix(docs) 
-matrix <- as.matrix(dtm) 
-words <- sort(rowSums(matrix),decreasing=TRUE) 
-df <- data.frame(word = names(words),freq=words)
-
-set.seed(1997) 
-wordcloud(words = df$word, freq = df$freq, min.freq = 1, max.words=200, random.order=FALSE, rot.per=0.35,            colors=brewer.pal(8, "Dark2"))
 ```
 
 # Discussion 
@@ -215,4 +251,8 @@ which can have some updates on a regular base.
   https://CRAN.R-project.org/package=tm
   
 10. Towards Data Science (2019). *How to Generate Word Clouds in R* [online]. Available from: https://towardsdatascience.com/create-a-word-cloud-with-r-bde3e7422e8a [accessed 13 December 2020].
+
+11. Stats And R (2020). *Draw a word cloud with a R Shiny app* [online]. Available from: https://www.statsandr.com/blog/draw-a-word-cloud-with-a-shiny-app/ [accessed 13 December 2020].
+
+
 
