@@ -41,7 +41,7 @@ ui <- fluidPage(
                              radioButtons("source",
                                           "Word Source", 
                                           c("Adzuna_uk" = "uk", "Adzuna_us" ="us", "The Muse"="muse")),
-                             numericInput("num", "Maximum Number Of Words", value = 180, min = 10)
+                             numericInput("num", "Maximum Number Of Words", value = 100, min = 10)
                          ),
                       
                          
@@ -114,32 +114,35 @@ server <- function(input, output) {
         if(input$skill == "R"){
             p <- ggplot(muse_data, aes(level, fill = R)) +
                 geom_bar() +
-                scale_fill_discrete(labels = c("Not Containing R", "JContaining R"))
+                ggtitle("Occurrence Frequency of R in Job Description") +
+                scale_fill_discrete(labels = c("Not Containing R", "JContaining R"))+
+                theme(axis.text.x = element_text(angle = 45, hjust = 1))
         }
         if(input$skill == "SAS"){
             p <- ggplot(muse_data, aes(level, fill = SAS)) +
                 geom_bar() +
-                scale_fill_discrete(labels = c("Not Containing SAS", "Containing SAS"))
+                ggtitle("Occurrence Frequency of SAS in Job Description") +
+                scale_fill_discrete(labels = c("Not Containing SAS", "Containing SAS"))+
+                theme(axis.text.x = element_text(angle = 45, hjust = 1))
         }
         if(input$skill == "Python"){
             p <- ggplot(muse_data, aes(level, fill = Python)) +
                 geom_bar() +
-                scale_fill_discrete(labels = c("Not Containing Python", "Containing Python"))
+                ggtitle("Occurrence Frequency of Python in Job Description") +
+                scale_fill_discrete(labels = c("Not Containing Python", "Containing Python"))+
+                theme(axis.text.x = element_text(angle = 45, hjust = 1))
         }
         if(input$skill == "SQL"){
             p <- ggplot(muse_data, aes(level, fill = sql)) +
                 geom_bar() +
                 ggtitle("Occurrence Frequency of SQL in Job Description") +
-                scale_fill_discrete(labels = c("Not Containing SQL", "Containing SQL"))
+                scale_fill_discrete(labels = c("Not Containing SQL", "Containing SQL"))+
+                theme(axis.text.x = element_text(angle = 45, hjust = 1))
         }
         print(p)
         
     })
-    plotOutput(
-        plot,
-        width = "100%",
-        height = "400px"
-    )
+    
     
     
     create_wordcloud <- function(text, num_words = 100){
