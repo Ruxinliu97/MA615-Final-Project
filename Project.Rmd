@@ -92,7 +92,7 @@ ggplot(Adzuna_data) +
 
   On The Muse website, we could obtain the level of the positions for each job 
   posting, which includes internship, entry, mid, senior, management. From Table 1
-  below, we can see the number of job posting in each level among the sampled pages,
+  , we can see the number of job posting in each level among the sampled pages,
   and it seems that under the data science category there are very few positions
   available for the entry level.
   
@@ -309,7 +309,7 @@ different countries could also be considered.
 
   The shiny app for this project is published on the bu-rstudio-connect.bu server: https://bu-rstudio-connect.bu.edu/connect/#/content/listing?filter=min_role:viewer&filter=content_type:all
   
-  The shiny app has tabs. The 1st tab provides reactive word clouds. The 2nd tab 
+  The shiny app has 3 tabs. The 1st tab provides reactive word clouds. The 2nd tab 
   provides reactive histograms to show the occurrence distribution of different
   programming skills. The 3rd tab can be selected to show the link and the API
   for several online job boards. 
