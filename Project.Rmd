@@ -42,6 +42,7 @@ library(wordcloud2)
 library(tm)
 library(tidyverse)
 library(dplyr)
+library(gridExtra)
 ```
 
 ```{r, echo = FALSE}
@@ -118,44 +119,62 @@ muse_data$R <- grepl("\\bR\\b",muse_data$contents)
 ```
 
 
+  From Fig.2 below, it is clear that instead of internships, about half of the 
+  job descriptions among other levels include SQL as a skill. 
 
 ```{r, message=FALSE, echo = FALSE}
 ggplot(muse_data, aes(level, fill = sql)) +
-  geom_bar()
+  geom_bar()  +
+  ggtitle("Fig. 2: Occurrence Frequency of SQL in Job Description") +
+  scale_fill_discrete(labels = c("Job Description Not Containing SQL", "Job Description Containing SQL"))
 ```
 
+
+  Fig.3 clearly shows that instead of the management level, more than half of the 
+  job descriptions among other levels include Python as a skill.
+  
 ```{r, message=FALSE, echo = FALSE}
 ggplot(muse_data, aes(level, fill = Python)) +
-  geom_bar()
+  geom_bar() +
+  ggtitle("Fig. 3: Occurrence Frequency of Python in Job Description") +
+  scale_fill_discrete(labels = c("Job Description Not Containing Python", "Job Description Containing Python"))
 ```
 
+
+  Fig.4 shows very different patterns compared to the plot for Python, where very
+  few of the job descriptions among all the levels include SAS as a skill.
+  
+  
 ```{r, message=FALSE, echo = FALSE}
-ggplot(muse_data, aes(level, fill = analysis)) +
-  geom_bar()
+ggplot(muse_data, aes(level, fill = SAS)) +
+  geom_bar() +
+  ggtitle("Fig. 4: Occurrence Frequency of SAS in Job Description") +
+  scale_fill_discrete(labels = c("Job Description Not Containing SAS", "Job Description Containing SAS"))
 ```
 
-```{r, echo = FALSE, message=FALSE, warning=FALSE}
-text <- muse_data$contents
-docs <- Corpus(VectorSource(text))
 
-docs <- docs %>%
-  tm_map(removeNumbers) %>%
-  tm_map(removePunctuation) %>%
-  tm_map(stripWhitespace)
-docs <- tm_map(docs, content_transformer(tolower))
-docs <- tm_map(docs, removeWords, stopwords("english"))
-docs <- tm_map(docs, removeWords, c("the", "will", "are", "you", "this"))
-
-dtm <- TermDocumentMatrix(docs) 
-matrix <- as.matrix(dtm) 
-words <- sort(rowSums(matrix),decreasing=TRUE) 
-df <- data.frame(word = names(words),freq=words)
-
-set.seed(1997) 
-wordcloud(words = df$word, freq = df$freq, min.freq = 1, max.words=180, random.order=FALSE, rot.per=0.35,            colors=brewer.pal(8, "Dark2"))
+  Lastly, Fig.5 displays similar patterns as what is seen from the plot for SQL, 
+  where more than half of the job descriptions among all the levels do not include
+  R as a skill.
+  
+  
+```{r, message=FALSE, echo = FALSE}
+ggplot(muse_data, aes(level, fill = R)) +
+  geom_bar() +
+  ggtitle("Fig. 5: Occurrence Frequency of R in Job Description") +
+  scale_fill_discrete(labels = c("Job Description Not Containing R", "Job Description Containing R"))
 ```
+
+
 
 # Word Cloud
+
+  We could analyze the text in job descriptions by creating the word cloud. Below
+  are the word clouds for the 3 data sources, which show the frequency of words
+  by visualization.
+  
+### Adzuna Data -- UK
+
 ```{r, warning=FALSE, message=FALSE, echo = FALSE}
 # Create a vector containing only the text
 text_uk <- Adzuna_data$description
@@ -169,21 +188,18 @@ docs_uk <- docs_uk %>%
 docs_uk <- tm_map(docs_uk, removeWords, c("the", "will", "are", "you", "this"))
 docs_uk <- tm_map(docs_uk, content_transformer(tolower))
 docs_uk <- tm_map(docs_uk, removeWords, stopwords("english"))
-```
 
-```{r, echo = FALSE}
 # Create a document-term-matrix
 dtm_uk <- TermDocumentMatrix(docs_uk) 
 matrix_uk <- as.matrix(dtm_uk) 
 words_uk <- sort(rowSums(matrix_uk),decreasing=TRUE) 
 df_uk <- data.frame(word = names(words_uk),freq=words_uk)
-```
 
-```{r, warning=FALSE, message=FALSE, echo = FALSE}
 # For reproducibility 
 set.seed(1997) 
 wordcloud(words = df_uk$word, freq = df_uk$freq, min.freq = 1, max.words=200, random.order=FALSE, rot.per=0.35,            colors=brewer.pal(8, "Dark2"))
 ```
+
 
 ### Adzuna Data -- US
 
@@ -209,7 +225,48 @@ set.seed(1997)
 wordcloud(words = df_us$word, freq = df_us$freq, min.freq = 1, max.words=200, random.order=FALSE, rot.per=0.35,            colors=brewer.pal(8, "Dark2"))
 ```
 
+# The Muse
+
+  
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+text <- muse_data$contents
+docs <- Corpus(VectorSource(text))
+
+docs <- docs %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(stripWhitespace)
+docs <- tm_map(docs, content_transformer(tolower))
+docs <- tm_map(docs, removeWords, stopwords("english"))
+docs <- tm_map(docs, removeWords, c("the", "will", "are", "you", "this"))
+
+dtm <- TermDocumentMatrix(docs) 
+matrix <- as.matrix(dtm) 
+words <- sort(rowSums(matrix),decreasing=TRUE) 
+df <- data.frame(word = names(words),freq=words)
+
+set.seed(1997) 
+wordcloud(words = df$word, freq = df$freq, min.freq = 1, max.words=180, random.order=FALSE, rot.per=0.35,            colors=brewer.pal(8, "Dark2"))
+```
+
+data experience analyst team business
+data analyst business support 
+data experience team learning research 
+
 # Discussion 
+
+* On average, jobs that contain "Statistician" in the titles have a higher salary,
+however, some jobs that do not contain "Statistician" in the titles have the potential
+to reach a much higher maximum salary. 
+
+* Based on the EDA, we can see some patterns of the occurrence frequency of programming
+languages in the job description. Overall, among the 4 tested programming skills,
+SAS is the least popular one. R and SQL both are mentioned in job descriptions 
+for about half of the time. And Python is now shown to be the most required skill  
+for data-related jobs. This could be very helpful when we are applying for jobs
+in the future. 
+
+* 
 
 # Limitations & Future Direction 
 
@@ -219,9 +276,16 @@ sites have new updates every day, it is almost impossible to have the complete/f
 data. Therefore, it could been developed into a more long-term project in the future,
 which can have some updates on a regular base. 
 
-*
+
+* Instead of increasing the sample size, more different online job boards across
+different countries could also be considered.
+
 
 # Shiny APP Description 
+
+  The shiny app for this project is published on the bu-rstudio-connect.bu server: https://bu-rstudio-connect.bu.edu/connect/#/content/listing?filter=min_role:viewer&filter=content_type:all
+  
+  The shiny app has tabs. The 1st tab
 
 # Bibliography
 
@@ -254,5 +318,6 @@ which can have some updates on a regular base.
 
 11. Stats And R (2020). *Draw a word cloud with a R Shiny app* [online]. Available from: https://www.statsandr.com/blog/draw-a-word-cloud-with-a-shiny-app/ [accessed 13 December 2020].
 
-
+12. Baptiste Auguie (2017). gridExtra: Miscellaneous Functions for "Grid" Graphics. R package version 2.3.
+  https://CRAN.R-project.org/package=gridExtra
 
