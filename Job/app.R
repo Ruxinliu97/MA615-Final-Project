@@ -10,12 +10,16 @@ library(RColorBrewer)
 library(wordcloud2)
 library(tm)
 library(shinythemes)
+library(syuzhet)
 
 # Load in the data sets
 muse_data <- read.csv("muse_data.csv")
 Adzuna_data <- read.csv("Adzuna_data.csv")
 Adzuna_us <- read.csv("Adzuna_us.csv")
 cite <- read.csv("jobsite.csv")
+muse <- read.csv("muse.csv")
+uk <- read.csv("uk.csv")
+us <- read.csv("us.csv")
 
 muse_data$sql <- grepl("SQL",muse_data$contents)
 muse_data$Python <- grepl("Python",muse_data$contents)
@@ -51,10 +55,8 @@ ui <- fluidPage(
                      )
             ) ,
             tabPanel("Programing Skills In Job Descriptions", 
-                     # Generate a row with a sidebar
                      sidebarLayout(      
                          
-                         # Define the sidebar with one input
                          sidebarPanel(
                              selectInput("skill", "Skill:", 
                                          choices = c("R", "SAS", "SQL","Python"))
@@ -63,6 +65,19 @@ ui <- fluidPage(
                          mainPanel(
                              plotOutput("plot")
                          ))) ,
+            
+            tabPanel("Emotion Analysis", 
+                     sidebarLayout(      
+                         
+                         sidebarPanel(
+                             selectInput("cite", "Text Source:", 
+                                         choices = c("Adzuna_uk", "Adzuna_us","The Muse"))
+                             
+                         ),
+                         mainPanel(
+                             plotOutput("plot2")
+                         ))) ,
+            
             tabPanel("Job Board Websites", 
                      # Generate a row with a sidebar
                      sidebarLayout(      
@@ -141,9 +156,55 @@ server <- function(input, output) {
         }
         print(p)
         
+        
     })
     
+    output$plot2 <- reactivePlot(function(){
+        if(input$cite == "Adzuna_uk"){
+            sent <- uk
+            sent2 <- as.data.frame(colSums(sent))
+            sent2 <- rownames_to_column(sent2)
+            colnames(sent2) <- c("emotion", "count")
+            p <- ggplot(sent2[-1, ], aes(x = emotion, y = count, fill = emotion)) + geom_bar(stat = "identity") + 
+                theme_minimal() +
+                theme(legend.position="none", panel.grid.major = element_blank()) + 
+                labs( x = "Emotion", y = "Total Count") + 
+                ggtitle("Sentiment of Job Descriptions on Adzuna UK") + 
+                theme(plot.title = element_text(hjust=0.5))+
+                theme(axis.text.x = element_text(angle = 45, hjust = 1))
+            
+        }
+        if(input$cite == "Adzuna_us"){
+            sent <- us
+            sent2 <- as.data.frame(colSums(sent))
+            sent2 <- rownames_to_column(sent2)
+            colnames(sent2) <- c("emotion", "count")
+            p <- ggplot(sent2[-1, ], aes(x = emotion, y = count, fill = emotion)) + geom_bar(stat = "identity") + 
+                theme_minimal() +
+                theme(legend.position="none", panel.grid.major = element_blank()) + 
+                labs( x = "Emotion", y = "Total Count") + 
+                ggtitle("Sentiment of Job Descriptions on Adzuna US") + 
+                theme(plot.title = element_text(hjust=0.5))+
+                theme(axis.text.x = element_text(angle = 45, hjust = 1))
+        }
+        if(input$cite == "The Muse"){
+            sent <- muse
+            sent2 <- as.data.frame(colSums(sent))
+            sent2 <- rownames_to_column(sent2) 
+            colnames(sent2) <- c("emotion", "count")
+            p <- ggplot(sent2[-1, ], aes(x = emotion, y = count, fill = emotion)) + geom_bar(stat = "identity") + 
+                theme_minimal() +
+                theme(legend.position="none", panel.grid.major = element_blank()) + 
+                labs( x = "Emotion", y = "Total Count") + 
+                ggtitle("Sentiment of Job Descriptions on The Muse") + 
+                theme(plot.title = element_text(hjust=0.5))+
+                theme(axis.text.x = element_text(angle = 45, hjust = 1))
+        }
     
+        print(p)
+        
+        
+    })
     
     create_wordcloud <- function(text, num_words = 100){
         
