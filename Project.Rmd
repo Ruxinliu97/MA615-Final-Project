@@ -272,6 +272,37 @@ wordcloud(words = df$word, freq = df$freq, min.freq = 1, max.words=180, random.o
   which suggests that different employment websites may have a slightly different
   focus when describing the position. 
   
+  
+### Emotion Analysis 
+
+
+  When I was searching online, I found that we can do emotion analysis with text,
+  which is similar to sentiment analysis. Interestingly, Brian Ward posted an analysis
+  of job descriptions from Indeed, which can be compared with the job website I am
+  using (Towards Data Science 2019). After doing an emotion analysis for job descriptions
+  from The Muse, we can see from Fig.6 that positive, trust and anticipation are
+  the 3 most highly ranked emotions, which have a very similar overall pattern 
+  with the results from Indeed that Brian Ward did in the past (Towards Data Science
+  2019). There is no surprise to observe that text from job posting mainly has a
+  positive tone/attitude, but it is interesting to see that the overall distribution
+  of emotional words is very similar across different job websites.
+  
+  
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+library(syuzhet)
+sent <- get_nrc_sentiment(muse_data$contents)
+sent2 <- as.data.frame(colSums(sent))
+sent2 <- rownames_to_column(sent2) 
+colnames(sent2) <- c("emotion", "count")
+ggplot(sent2, aes(x = emotion, y = count, fill = emotion)) + geom_bar(stat = "identity") + 
+  theme_minimal() +
+  theme(legend.position="none", panel.grid.major = element_blank()) + 
+  labs( x = "Emotion", y = "Total Count") + 
+  ggtitle("Fig.6 Sentiment of Job Descriptions on The Muse") + 
+  theme(plot.title = element_text(hjust=0.5))
+
+```
+
 
 
 
@@ -310,10 +341,11 @@ different countries could also be considered.
 
   The shiny app for this project is published on the bu-rstudio-connect.bu server: https://bu-rstudio-connect.bu.edu/connect/#/content/listing?filter=min_role:viewer&filter=content_type:all
   
-  The shiny app has 3 tabs. The 1st tab provides reactive word clouds. The 2nd tab 
+  The shiny app has 4 tabs. The 1st tab provides reactive word clouds. The 2nd tab 
   provides reactive histograms to show the occurrence distribution of different
-  programming skills. The 3rd tab can be selected to show the link and the API
-  for several online job boards. 
+  programming skills. The 3rd tab displays emotion analysis for the 3 different
+  text source. The last tab can be selected to show the link and the API for several
+  online job boards. 
 
 # Bibliography
 
@@ -349,3 +381,8 @@ different countries could also be considered.
 12. Baptiste Auguie (2017). gridExtra: Miscellaneous Functions for "Grid" Graphics. R package version 2.3.
   https://CRAN.R-project.org/package=gridExtra
 
+13. Towards Data Science (2019). *A Light Introduction to Text Analysis in R* [online]. Available from:
+https://towardsdatascience.com/a-light-introduction-to-text-analysis-in-r-ea291a9865a8  [accessed 13 December 2020].
+
+14. Jockers ML (2015). _Syuzhet: Extract Sentiment and Plot Arcs from Text_. <URL:
+https://github.com/mjockers/syuzhet>.
