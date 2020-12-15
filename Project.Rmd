@@ -4,8 +4,9 @@ author: "Ruxin Liu"
 date: "12/13/2020"
 output: pdf_document
 ---
+
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(fig.pos = 'H')
+knitr::opts_chunk$set(fig.height = 4, fig.width = 6, fig.align = "center", fig.pos = 'H')
 ```
 
 # Introduction
