@@ -299,7 +299,8 @@ ggplot(sent2, aes(x = emotion, y = count, fill = emotion)) + geom_bar(stat = "id
   theme(legend.position="none", panel.grid.major = element_blank()) + 
   labs( x = "Emotion", y = "Total Count") + 
   ggtitle("Fig.6 Sentiment of Job Descriptions on The Muse") + 
-  theme(plot.title = element_text(hjust=0.5))
+  theme(plot.title = element_text(hjust=0.5)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ```
 
@@ -315,7 +316,7 @@ to reach a much higher maximum salary.
 * Based on the EDA, we can see some patterns of the occurrence frequency of programming
 languages in the job description. Overall, among the 4 tested programming skills,
 SAS is the least popular one. R and SQL both are mentioned in job descriptions 
-for about half of the time. And Python is now shown to be the most required skill  
+for about half of the time. And Python is now shown to be the most required skill
 for data-related jobs. This could be very helpful when we are applying for jobs
 in the future. 
 
