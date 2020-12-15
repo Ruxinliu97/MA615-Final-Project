@@ -1,5 +1,5 @@
 ---
-title: "Final Project report -- Job Descriptions"
+title: "Final Project Report -- Job Descriptions"
 author: "Ruxin Liu"
 date: "12/13/2020"
 output: pdf_document
@@ -322,6 +322,9 @@ in the future.
 * The job information for different countries from the same job board is more 
 likely to have similar descriptions, while similar job information from different 
 job boards may have a different focus when describing the position. 
+
+* The emotional tone being used in job descriptions are very similar across different
+job boards. 
 
 
 # Limitations & Future Direction 
